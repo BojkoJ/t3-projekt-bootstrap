@@ -6,7 +6,7 @@ Toto je [T3 Stack](https://create.t3.gg/) projekt scaffoldovaný pomocí `create
 
 V tomto projektu jsem se rozhodl kromě povinného Bootstrapu použít další technologie pro efektivní vývoj.
 
--   [TypeScrpt](https://www.typescriptlang.org/)
+-   [TypeScript](https://www.typescriptlang.org/)
 -   [Next.js](https://nextjs.org)
 -   [Drizzle ORM](https://orm.drizzle.team)
 -   [Bootstrap](https://getbootstrap.com/)
