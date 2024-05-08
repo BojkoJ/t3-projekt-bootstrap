@@ -1,28 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import type { CombinedAppointmentData } from "~/server/api/routers/appointment";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-const Table = ({
-	rows,
-}: {
-	rows: CombinedAppointmentData[]; // Use an array of the appropriate type
-}) => {
-	const [activeRowIndex, setActiveRowIndex] = useState<number | null>(null);
-	const [activeRowData, setActiveRowData] =
-		useState<CombinedAppointmentData | null>(null);
+import type { CombinedAppointmentData } from "~/server/api/routers/appointment";
+import useActiveRowStore from "../store";
+
+const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
+
+	const activeRowIndex = useActiveRowStore((state) => state.activeRowIndex);
+	const setActiveRowIndex = useActiveRowStore(
+		(state) => state.setActiveRowIndex
+	);
 
 	const handleRowClick = (index: number) => {
 		setActiveRowIndex(index);
-		setActiveRowData(rows[index] ?? null);
+
+		const selectedRow = rows[index];
+
+		// Retrieve the `id_appointment` of the clicked row
+		const id_appointment = selectedRow?.id_appointment;
+
+		// Ensure `id_appointment` is defined before proceeding
+		if (id_appointment !== undefined && id_appointment !== null) {
+			// Create a new URLSearchParams object and set the `id_appointment` parameter
+			const updatedSearchParams = new URLSearchParams(
+				searchParams.toString()
+			);
+
+			updatedSearchParams.set(
+				"id_appointment",
+				id_appointment.toString()
+			);
+
+			// Replace the URL with the updated search parameters
+			router.replace(`${pathname}?${updatedSearchParams.toString()}`);
+		}
 	};
 
 	return (
-		<div className='container mt-5'>
+		<div className='container mt-3 '>
 			{/* Heading */}
-			<h1 className='mb-4 text-center'>
+			<h2 className='mb-4 text-center'>
 				Tetovací salón SigilArt - evidence termínů
-			</h1>
+			</h2>
 
 			{/* Filters Form */}
 			<div className='row mb-5 mt-2'>
@@ -67,7 +90,7 @@ const Table = ({
 			{/* Appointments Table */}
 			<div className='row'>
 				<div className='col'>
-					<table className='table'>
+					<table className='table table-hover'>
 						<thead className='thead-dark'>
 							<tr>
 								<th scope='col'>ID Termínu</th>
@@ -83,12 +106,14 @@ const Table = ({
 							{rows.map((row, index) => (
 								<tr
 									key={row.id_appointment}
-									className={
+									className={` ${
 										index === activeRowIndex
 											? "table-active"
 											: ""
-									}
-									style={{ cursor: "pointer" }}
+									}`}
+									style={{
+										cursor: "pointer",
+									}}
 									onClick={() => handleRowClick(index)}
 								>
 									<th scope='row'>{row.id_appointment}</th>
@@ -102,450 +127,6 @@ const Table = ({
 							))}
 						</tbody>
 					</table>
-				</div>
-			</div>
-
-			{/* Tabs */}
-			<ul className='nav nav-tabs' id='myTab' role='tablist'>
-				<li className='nav-item' role='presentation'>
-					<button
-						className='nav-link active'
-						id='details-tab'
-						data-bs-toggle='tab'
-						data-bs-target='#details'
-						type='button'
-						role='tab'
-						aria-controls='details'
-						aria-selected='true'
-					>
-						Podrobnosti
-					</button>
-				</li>
-				<li className='nav-item' role='presentation'>
-					<button
-						className='nav-link'
-						id='customer-tab'
-						data-bs-toggle='tab'
-						data-bs-target='#customer'
-						type='button'
-						role='tab'
-						aria-controls='customer'
-						aria-selected='false'
-					>
-						Zákazník
-					</button>
-				</li>
-				<li className='nav-item' role='presentation'>
-					<button
-						className='nav-link'
-						id='design-tab'
-						data-bs-toggle='tab'
-						data-bs-target='#design'
-						type='button'
-						role='tab'
-						aria-controls='design'
-						aria-selected='false'
-					>
-						Návrh
-					</button>
-				</li>
-			</ul>
-
-			<div className='tab-content' id='myTabContent'>
-				{/* Details tab */}
-				<div
-					className='tab-pane fade show active'
-					id='details'
-					role='tabpanel'
-					aria-labelledby='details-tab'
-				>
-					<div className='row mt-4'>
-						<div className='col-2'>
-							<h5>Termín</h5>
-							<div className='mb-2'>
-								<label
-									htmlFor='idTerminu'
-									className='form-label'
-								>
-									ID Termínu:
-								</label>
-								<input
-									type='text'
-									id='idTerminu'
-									className='form-control'
-									defaultValue={
-										activeRowData?.id_appointment ?? ""
-									}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='datumTerminu'
-									className='form-label'
-								>
-									Datum:
-								</label>
-								<input
-									type='date'
-									id='datumTerminu'
-									className='form-control'
-									defaultValue={activeRowData?.date ?? ""}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='casTerminu'
-									className='form-label'
-								>
-									Čas:
-								</label>
-								<input
-									type='time'
-									id='casTerminu'
-									className='form-control'
-									defaultValue={activeRowData?.time ?? ""}
-								/>
-							</div>
-						</div>
-
-						<div className='col-2'>
-							<h5>Zákazník</h5>
-							<div className='mb-2'>
-								<label
-									htmlFor='idZakaznika'
-									className='form-label'
-								>
-									ID Zákazníka:
-								</label>
-								<input
-									type='text'
-									id='idZakaznika'
-									className='form-control'
-									style={{
-										backgroundColor: "#e9ecef",
-										cursor: "default",
-									}}
-									readOnly
-									defaultValue={
-										activeRowData?.id_customer ?? ""
-									}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='jmenoZakaznika'
-									className='form-label'
-								>
-									Jméno:
-								</label>
-								<input
-									type='text'
-									id='jmenoZakaznika'
-									className='form-control'
-									style={{
-										backgroundColor: "#e9ecef",
-										cursor: "default",
-									}}
-									readOnly
-									defaultValue={
-										activeRowData?.firstName ?? ""
-									}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='prijmeniZakaznika'
-									className='form-label'
-								>
-									Příjmení:
-								</label>
-								<input
-									type='text'
-									id='prijmeniZakaznika'
-									className='form-control'
-									style={{
-										backgroundColor: "#e9ecef",
-										cursor: "default",
-									}}
-									readOnly
-									defaultValue={activeRowData?.lastName ?? ""}
-								/>
-							</div>
-						</div>
-
-						<div className='col-2'>
-							<h5>Návrh</h5>
-							<div className='mb-2'>
-								<label
-									htmlFor='idNavrhu'
-									className='form-label'
-								>
-									ID Návrhu:
-								</label>
-								<input
-									type='text'
-									id='idNavrhu'
-									className='form-control'
-									style={{
-										backgroundColor: "#e9ecef",
-										cursor: "default",
-									}}
-									readOnly
-									defaultValue={
-										activeRowData?.id_design ?? ""
-									}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='nazevNavrhu'
-									className='form-label'
-								>
-									Název:
-								</label>
-								<input
-									type='text'
-									id='nazevNavrhu'
-									className='form-control'
-									style={{
-										backgroundColor: "#e9ecef",
-										cursor: "default",
-									}}
-									readOnly
-									defaultValue={
-										activeRowData?.designName ?? ""
-									}
-								/>
-							</div>
-						</div>
-
-						<div className='col-2'>
-							<h5>&nbsp;</h5>
-							<div className='mb-2'>
-								<label
-									htmlFor='delkaVytetovani'
-									className='form-label'
-								>
-									Délka vytetování:
-								</label>
-								<input
-									type='text'
-									id='delkaVytetovani'
-									className='form-control'
-									style={{
-										backgroundColor: "#e9ecef",
-										cursor: "default",
-									}}
-									readOnly
-									defaultValue={activeRowData?.duration ?? ""}
-								/>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				{/* Customer tab */}
-				<div
-					className='tab-pane fade'
-					id='customer'
-					role='tabpanel'
-					aria-labelledby='customer-tab'
-				>
-					<div className='row mt-4'>
-						{/* First column: Basic details */}
-						<div className='col-3'>
-							<h5>Základní údaje:</h5>
-							<div className='mb-2'>
-								<label
-									htmlFor='idZakaznika'
-									className='form-label'
-								>
-									ID Zákazníka:
-								</label>
-								<input
-									type='text'
-									id='idZakaznika-2'
-									className='form-control'
-									defaultValue={
-										activeRowData?.id_customer ?? ""
-									}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='jmenoZakaznika'
-									className='form-label'
-								>
-									Jméno:
-								</label>
-								<input
-									type='text'
-									id='jmenoZakaznika'
-									className='form-control'
-									defaultValue={
-										activeRowData?.firstName ?? ""
-									}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='prijmeniZakaznika'
-									className='form-label'
-								>
-									Příjmení:
-								</label>
-								<input
-									type='text'
-									id='prijmeniZakaznika'
-									className='form-control'
-									defaultValue={activeRowData?.lastName ?? ""}
-								/>
-							</div>
-						</div>
-
-						{/* Second column: Contact details */}
-						<div className='col-3'>
-							<h5>Kontaktní údaje:</h5>
-							<div className='mb-2'>
-								<label
-									htmlFor='emailZakaznika'
-									className='form-label'
-								>
-									Email:
-								</label>
-								<input
-									type='email'
-									id='emailZakaznika'
-									className='form-control'
-									defaultValue={activeRowData?.email ?? ""}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='telefonZakaznika'
-									className='form-label'
-								>
-									Telefon:
-								</label>
-								<input
-									type='text'
-									id='telefonZakaznika'
-									className='form-control'
-									defaultValue={activeRowData?.phone ?? ""}
-								/>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				{/* Design tab */}
-				<div
-					className='tab-pane fade'
-					id='design'
-					role='tabpanel'
-					aria-labelledby='design-tab'
-				>
-					<div className='row mt-4'>
-						{/* First column: Basic details */}
-						<div className='col-3'>
-							<h5>Základní údaje:</h5>
-							<div className='mb-2'>
-								<label
-									htmlFor='idNavrhu'
-									className='form-label'
-								>
-									ID Návrhu:
-								</label>
-								<input
-									type='text'
-									id='idNavrhu-2'
-									className='form-control'
-									defaultValue={
-										activeRowData?.id_design ?? ""
-									}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='nazevNavrhu'
-									className='form-label'
-								>
-									Název:
-								</label>
-								<input
-									type='text'
-									id='nazevNavrhu'
-									className='form-control'
-									defaultValue={
-										activeRowData?.designName ?? ""
-									}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='delkaVytetovani'
-									className='form-label'
-								>
-									Délka vytetování:
-								</label>
-								<input
-									type='text'
-									id='delkaVytetovani'
-									className='form-control'
-									defaultValue={activeRowData?.duration ?? ""}
-								/>
-							</div>
-						</div>
-
-						{/* Second column: Size and placement */}
-						<div className='col-3'>
-							<h5>Velikost a Umístění:</h5>
-							<div className='mb-2'>
-								<label
-									htmlFor='sirkaNavrhu'
-									className='form-label'
-								>
-									Šířka:
-								</label>
-								<input
-									type='number'
-									id='sirkaNavrhu'
-									className='form-control'
-									defaultValue={activeRowData?.width ?? ""}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='vyskaNavrhu'
-									className='form-label'
-								>
-									Výška:
-								</label>
-								<input
-									type='number'
-									id='vyskaNavrhu'
-									className='form-control'
-									defaultValue={activeRowData?.height ?? ""}
-								/>
-							</div>
-							<div className='mb-2'>
-								<label
-									htmlFor='umisteniNavrhu'
-									className='form-label'
-								>
-									Umístění:
-								</label>
-								<input
-									type='text'
-									id='umisteniNavrhu'
-									className='form-control'
-									defaultValue={
-										activeRowData?.placement ?? ""
-									}
-								/>
-							</div>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>
