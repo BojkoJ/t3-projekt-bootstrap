@@ -40,8 +40,13 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 		const id_appointment = selectedRow?.id_appointment;
 
 		if (id_appointment !== undefined && id_appointment !== null) {
-			const updatedSearchParams = new URLSearchParams(searchParams.toString());
-			updatedSearchParams.set("id_appointment", id_appointment.toString());
+			const updatedSearchParams = new URLSearchParams(
+				searchParams.toString()
+			);
+			updatedSearchParams.set(
+				"id_appointment",
+				id_appointment.toString()
+			);
 
 			router.replace(`${pathname}?${updatedSearchParams.toString()}`);
 		}
@@ -133,69 +138,72 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 	};
 
 	return (
-		<div className="container mt-3">
+		<div className='container mt-1'>
 			{/* Nadpis */}
-			<div className="d-flex justify-content-center align-items-center">
+			<div className='d-flex justify-content-center align-items-center'>
 				<Image
-					className="mx-5"
-					src="/sigilart.png"
-					alt="SigilArt logo"
+					className='mx-5'
+					src='/sigilart.png'
+					alt='SigilArt logo'
 					width={150}
 					height={150}
 				/>
-				<h2 className="mb-4 text-center">
+				<h2 className='mb-4 text-center'>
 					Tetovací salón SigilArt - evidence termínů
 				</h2>
 				<Image
-					className="mx-5"
-					src="/sigilart.png"
-					alt="SigilArt logo"
+					className='mx-5'
+					src='/sigilart.png'
+					alt='SigilArt logo'
 					width={150}
 					height={150}
 				/>
 			</div>
 
 			{/* Formulář s filtry */}
-			<div className="row mb-5 mt-2">
-				<div className="col">
-					<h3 className="mb-3">Filtry:</h3>
-					<form className="form-inline" onSubmit={handleFormSubmit}>
+			<div className='row mb-3 mt-2'>
+				<div className='col'>
+					<h3 className='mb-3'>Filtry:</h3>
+					<form className='form-inline' onSubmit={handleFormSubmit}>
 						<input
-							type="text"
-							className="form-control mx-3 my-2 d-inline-block w-25"
-							placeholder="Příjmení zákazníka"
+							type='text'
+							className='form-control mx-3 my-2 d-inline-block w-25'
+							placeholder='Příjmení zákazníka'
 							value={filterLastName}
 							onChange={handleLastNameChange}
 						/>
 						<input
-							type="date"
-							className="form-control mx-3 my-2 d-inline-block w-25"
-							placeholder="Datum termínu"
+							type='date'
+							className='form-control mx-3 my-2 d-inline-block w-25'
+							placeholder='Datum termínu'
 							value={filterDate}
 							onChange={handleDateChange}
 						/>
 						<input
-							type="time"
-							className="form-control mx-3 my-2 d-inline-block w-25"
-							placeholder="Čas termínu"
+							type='time'
+							className='form-control mx-3 my-2 d-inline-block w-25'
+							placeholder='Čas termínu'
 							value={filterTime}
 							onChange={handleTimeChange}
 						/>
 						<input
-							type="text"
-							className="form-control mx-3 my-2 d-inline-block w-25"
-							placeholder="ID Návrhu"
+							type='text'
+							className='form-control mx-3 my-2 d-inline-block w-25'
+							placeholder='ID Návrhu'
 							value={filterDesignId}
 							onChange={handleDesignIdChange}
 						/>
 						<input
-							type="text"
-							className="form-control mx-3 my-2 d-inline-block w-25"
-							placeholder="Délka termínu"
+							type='text'
+							className='form-control mx-3 my-2 d-inline-block w-25'
+							placeholder='Délka termínu'
 							value={filterDuration}
 							onChange={handleDurationChange}
 						/>
-						<button type="submit" className="btn btn-secondary mx-3 my-2">
+						<button
+							type='submit'
+							className='btn btn-secondary mx-3 my-2'
+						>
 							Aplikovat filtry
 						</button>
 					</form>
@@ -203,29 +211,36 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 			</div>
 
 			{/* Tabulka termínů */}
-			<div className="row">
-				<div className="col" style={{ height: "230px", overflowY: "auto" }}>
-					<table className="table table-hover">
-						<thead className="thead-dark">
+			<div className='row'>
+				<div
+					className='col'
+					style={{ height: "230px", overflowY: "auto" }}
+				>
+					<table className='table table-hover'>
+						<thead className='thead-dark'>
 							<tr>
-								<th scope="col">ID Termínu</th>
-								<th scope="col">Datum termínu</th>
-								<th scope="col">Čas termínu</th>
-								<th scope="col">Jméno zákazníka</th>
-								<th scope="col">Příjmení zákazníka</th>
-								<th scope="col">ID Návrhu</th>
-								<th scope="col">Délka termínu (minut)</th>
+								<th scope='col'>ID Termínu</th>
+								<th scope='col'>Datum termínu</th>
+								<th scope='col'>Čas termínu</th>
+								<th scope='col'>Jméno zákazníka</th>
+								<th scope='col'>Příjmení zákazníka</th>
+								<th scope='col'>ID Návrhu</th>
+								<th scope='col'>Délka termínu (minut)</th>
 							</tr>
 						</thead>
 						<tbody>
 							{currentRows.map((row, index) => (
 								<tr
 									key={row.id_appointment}
-									className={index === activeRowIndex ? "table-active" : ""}
+									className={
+										index === activeRowIndex
+											? "table-active"
+											: ""
+									}
 									style={{ cursor: "pointer" }}
 									onClick={() => handleRowClick(index)}
 								>
-									<th scope="row">{row.id_appointment}</th>
+									<th scope='row'>{row.id_appointment}</th>
 									<td>{row.date}</td>
 									<td>{row.time}</td>
 									<td>{row.firstName}</td>
@@ -240,7 +255,10 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 			</div>
 
 			{/* Ovládání stránkování */}
-			<div className="d-flex justify-content-center" style={{ height: "20px" }}>
+			<div
+				className='d-flex justify-content-center'
+				style={{ height: "20px" }}
+			>
 				<Pagination>
 					{Array.from({ length: totalPages }, (_, index) => (
 						<Pagination.Item
