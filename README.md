@@ -21,3 +21,13 @@ Chcete-li se o [T3 Stacku](https://create.t3.gg/) dozvědět více, podívejte s
 -   [Naučit se T3 stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Návody
 
 Můžete si prohlédnout [create-t3-app GitHub repozitář](https://github.com/t3-oss/create-t3-app).
+
+## Jak spustit lokálně
+
+Chcete-li projekt spustit, je třeba mít nainstalovaný <b>[Node.js](https://nodejs.org/en)</b> a <b>[pnpm](https://pnpm.io/)</b> package manager:
+
+-   Naklonujte repozitář
+-   Spusttě `pnpm install` příkaz ve složce projektu pro nainstalování balíčků
+-   Spusťtě `pnpm run db:push` příkaz ve složce projektu pro vytvoření předdefinované databáze pomocí ORM Drizzle
+-   Spusttě `pnpm run dev` příkaz ve složce projektu pro spuštění aplikace
+-   Aplikace nyní běží na http://localhost:3000
