@@ -27,10 +27,7 @@ const Form = async ({
 
 		// Convert form data to an object for easier processing
 		const data = {
-			id_appointment: parseInt(
-				formData.get("id_appointment") as string,
-				10
-			),
+			id_appointment: parseInt(formData.get("id_appointment") as string, 10),
 			date: formData.get("date") as string,
 			time: formData.get("time") as string,
 			id_customer: parseInt(formData.get("id_customer") as string, 10),
@@ -72,7 +69,7 @@ const Form = async ({
 	};
 
 	return (
-		<div className='container mt-5'>
+		<div className="container">
 			<Formclient appointment={appointment} handleSubmit={handleSubmit} />
 		</div>
 	);

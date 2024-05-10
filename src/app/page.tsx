@@ -10,7 +10,7 @@ export default async function Page({
 	const appointments = await res.appointment.getAll();
 
 	return (
-		<div>
+		<div style={{ height: "100vh", overflowY: "hidden" }}>
 			{/* Pass formData and handleRowClick function to the client component */}
 			<Table rows={appointments} />
 

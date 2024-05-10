@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import type { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { CombinedAppointmentData } from "~/server/api/routers/appointment";
 import useActiveRowStore from "../store";
+import Image from "next/image";
 
 const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 	const router = useRouter();
@@ -16,114 +16,191 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 		(state) => state.setActiveRowIndex
 	);
 
-	// Stavy pro sledování vstupů filtru
-	const [lastNameFilter, setLastNameFilter] = useState("");
-	const [dateFilter, setDateFilter] = useState("");
-	const [timeFilter, setTimeFilter] = useState("");
-	const [idDesignFilter, setIdDesignFilter] = useState("");
-	const [durationFilter, setDurationFilter] = useState("");
+	// Stav pro filtry
+	const [filterLastName, setFilterLastName] = useState("");
+	const [filterDate, setFilterDate] = useState("");
+	const [filterTime, setFilterTime] = useState("");
+	const [filterDesignId, setFilterDesignId] = useState("");
+	const [filterDuration, setFilterDuration] = useState("");
+	const [isFilterApplied, setIsFilterApplied] = useState(false);
 
-	// Stav pro sledování filtrovaných řádků
-	const [filteredRows, setFilteredRows] = useState(rows);
+	// Stav pro stránkování
+	const [currentPage, setCurrentPage] = useState(1);
+	const rowsPerPage = 4; // Počet řádků na stránku
 
 	const handleRowClick = (index: number) => {
-		setActiveRowIndex(index);
+		const adjustedIndex = indexOfFirstRow + index;
 
-		const selectedRow = filteredRows[index];
+		setActiveRowIndex(adjustedIndex);
 
-		// Z tohoto kliknutého řádku získáme `id_appointment`
+		const selectedRow = filteredRows[adjustedIndex];
+
 		const id_appointment = selectedRow?.id_appointment;
 
-		// Ensure `id_appointment` is defined before proceeding
 		if (id_appointment !== undefined && id_appointment !== null) {
-			// Vytvoříme nový objekt URLSearchParams a nastavíme parametr `id_appointment`
 			const updatedSearchParams = new URLSearchParams(searchParams.toString());
-
 			updatedSearchParams.set("id_appointment", id_appointment.toString());
 
-			// URL bude vypadat nějak takhle: /form?id_appointment=1
 			router.replace(`${pathname}?${updatedSearchParams.toString()}`);
 		}
 	};
 
-	// Funcke pro odeslání formuláře filtru
-	const handleFilterSubmit = (e: FormEvent) => {
-		e.preventDefault();
+	const handleFormSubmit = (event: FormEvent) => {
+		event.preventDefault();
+		setIsFilterApplied(true);
+	};
 
-		// Filtrujeme řádky na základě vstupů
-		const filtered = rows.filter((row) => {
-			const lastNameMatch = lastNameFilter
-				? row.lastName?.toLowerCase().includes(lastNameFilter.toLowerCase())
-				: true;
-			const dateMatch = dateFilter ? row.date === dateFilter : true;
-			const timeMatch = timeFilter ? row.time === timeFilter : true;
-			const idDesignMatch = idDesignFilter
-				? row.id_design?.toString() === idDesignFilter
-				: true;
-			const durationMatch = durationFilter
-				? row.duration?.toString() === durationFilter
-				: true;
+	// Filtruje řádky na základě hodnot filtrů a stavu isFilterApplied
+	const filteredRows = isFilterApplied
+		? rows.filter((row) => {
+				const isLastNameMatch = row.lastName
+					?.toLowerCase()
+					.includes(filterLastName.toLowerCase());
+				const isDateMatch = filterDate ? row.date === filterDate : true;
+				const isTimeMatch = filterTime ? row.time === filterTime : true;
+				const isDesignIdMatch = filterDesignId
+					? row.id_design?.toString() === filterDesignId
+					: true;
+				const isDurationMatch = filterDuration
+					? row.duration?.toString() === filterDuration
+					: true;
 
-			// Vrátime true, pokud všechny filtry odpovídají
-			return (
-				lastNameMatch &&
-				dateMatch &&
-				timeMatch &&
-				idDesignMatch &&
-				durationMatch
-			);
-		});
+				return (
+					isLastNameMatch &&
+					isDateMatch &&
+					isTimeMatch &&
+					isDesignIdMatch &&
+					isDurationMatch
+				);
+		  })
+		: rows;
 
-		// Updatneme stav s filtrovanými řádky
-		setFilteredRows(filtered);
+	// Počítání celkového počtu stránek
+	const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+
+	// Výpočet rozsahu řádků pro zobrazení na aktuální stránce
+	const indexOfLastRow = currentPage * rowsPerPage;
+	const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+	const currentRows = filteredRows.slice(indexOfFirstRow, indexOfLastRow);
+
+	// Ovládací prvky pro stránkování
+	const handleNextPage = () => {
+		if (currentPage < totalPages) {
+			setCurrentPage((prevPage) => prevPage + 1);
+		}
+		setActiveRowIndex(null);
+	};
+
+	const handlePreviousPage = () => {
+		if (currentPage > 1) {
+			setCurrentPage((prevPage) => prevPage - 1);
+		}
+		setActiveRowIndex(null);
+	};
+
+	// Zpracování změny hodnot filtrů a reset isFilterApplied, pokud je to nutné
+	const handleLastNameChange = (e: FormEvent<HTMLInputElement>) => {
+		const newValue = e.currentTarget.value;
+		setFilterLastName(newValue);
+		if (newValue === "") {
+			setIsFilterApplied(false);
+		}
+	};
+
+	const handleDateChange = (e: FormEvent<HTMLInputElement>) => {
+		const newValue = e.currentTarget.value;
+		setFilterDate(newValue);
+		if (newValue === "") {
+			setIsFilterApplied(false);
+		}
+	};
+
+	const handleTimeChange = (e: FormEvent<HTMLInputElement>) => {
+		const newValue = e.currentTarget.value;
+		setFilterTime(newValue);
+		if (newValue === "") {
+			setIsFilterApplied(false);
+		}
+	};
+
+	const handleDesignIdChange = (e: FormEvent<HTMLInputElement>) => {
+		const newValue = e.currentTarget.value;
+		setFilterDesignId(newValue);
+		if (newValue === "") {
+			setIsFilterApplied(false);
+		}
+	};
+
+	const handleDurationChange = (e: FormEvent<HTMLInputElement>) => {
+		const newValue = e.currentTarget.value;
+		setFilterDuration(newValue);
+		if (newValue === "") {
+			setIsFilterApplied(false);
+		}
 	};
 
 	return (
 		<div className="container mt-3">
-			{/* Heading */}
-			<h2 className="mb-4 text-center">
-				Tetovací salón SigilArt - evidence termínů
-			</h2>
+			{/* Nadpis */}
+			<div className="d-flex justify-content-center align-items-center">
+				<Image
+					className="mx-5"
+					src="/sigilart.png"
+					alt="SigilArt logo"
+					width={150}
+					height={150}
+				/>
+				<h2 className="mb-4 text-center">
+					Tetovací salón SigilArt - evidence termínů
+				</h2>
+				<Image
+					className="mx-5"
+					src="/sigilart.png"
+					alt="SigilArt logo"
+					width={150}
+					height={150}
+				/>
+			</div>
 
-			{/* Filters Form */}
+			{/* Formulář s filtry */}
 			<div className="row mb-5 mt-2">
 				<div className="col">
 					<h3 className="mb-3">Filtry:</h3>
-					<form className="form-inline" onSubmit={handleFilterSubmit}>
+					<form className="form-inline" onSubmit={handleFormSubmit}>
 						<input
 							type="text"
 							className="form-control mx-3 my-2 d-inline-block w-25"
 							placeholder="Příjmení zákazníka"
-							value={lastNameFilter}
-							onChange={(e) => setLastNameFilter(e.target.value)}
+							value={filterLastName}
+							onChange={handleLastNameChange}
 						/>
 						<input
 							type="date"
 							className="form-control mx-3 my-2 d-inline-block w-25"
 							placeholder="Datum termínu"
-							value={dateFilter}
-							onChange={(e) => setDateFilter(e.target.value)}
+							value={filterDate}
+							onChange={handleDateChange}
 						/>
 						<input
 							type="time"
 							className="form-control mx-3 my-2 d-inline-block w-25"
 							placeholder="Čas termínu"
-							value={timeFilter}
-							onChange={(e) => setTimeFilter(e.target.value)}
+							value={filterTime}
+							onChange={handleTimeChange}
 						/>
 						<input
 							type="text"
 							className="form-control mx-3 my-2 d-inline-block w-25"
 							placeholder="ID Návrhu"
-							value={idDesignFilter}
-							onChange={(e) => setIdDesignFilter(e.target.value)}
+							value={filterDesignId}
+							onChange={handleDesignIdChange}
 						/>
 						<input
 							type="text"
 							className="form-control mx-3 my-2 d-inline-block w-25"
 							placeholder="Délka termínu"
-							value={durationFilter}
-							onChange={(e) => setDurationFilter(e.target.value)}
+							value={filterDuration}
+							onChange={handleDurationChange}
 						/>
 						<button type="submit" className="btn btn-secondary mx-3 my-2">
 							Aplikovat filtry
@@ -132,9 +209,9 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 				</div>
 			</div>
 
-			{/* Appointments Table */}
+			{/* Tabulka termínů */}
 			<div className="row">
-				<div className="col">
+				<div className="col" style={{ height: "230px", overflowY: "auto" }}>
 					<table className="table table-hover">
 						<thead className="thead-dark">
 							<tr>
@@ -148,12 +225,10 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 							</tr>
 						</thead>
 						<tbody>
-							{filteredRows.map((row, index) => (
+							{currentRows.map((row, index) => (
 								<tr
 									key={row.id_appointment}
-									className={` ${
-										index === activeRowIndex ? "table-active" : ""
-									}`}
+									className={index === activeRowIndex ? "table-active" : ""}
 									style={{ cursor: "pointer" }}
 									onClick={() => handleRowClick(index)}
 								>
@@ -168,6 +243,29 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 							))}
 						</tbody>
 					</table>
+				</div>
+			</div>
+
+			{/* Ovládání stránkování */}
+			<div className="d-flex justify-content-center ">
+				<div className="d-flex justify-content-between align-items-center  w-25 ">
+					<button
+						className="btn btn-primary"
+						onClick={handlePreviousPage}
+						disabled={currentPage === 1}
+					>
+						Předchozí
+					</button>
+					<span className="mx-3">
+						Stránka {currentPage} z {totalPages}
+					</span>
+					<button
+						className="btn btn-primary"
+						onClick={handleNextPage}
+						disabled={currentPage === totalPages}
+					>
+						Další
+					</button>
 				</div>
 			</div>
 		</div>
