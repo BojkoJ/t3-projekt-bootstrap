@@ -159,7 +159,6 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 					height={150}
 				/>
 			</div>
-
 			{/* Formulář s filtry */}
 			<div className='row mb-3 mt-2'>
 				<div className='col'>
@@ -209,8 +208,7 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 					</form>
 				</div>
 			</div>
-
-			{/* Tabulka termínů */}
+			{/*Tabulka termínů*/}
 			<div className='row'>
 				<div
 					className='col'
@@ -241,7 +239,13 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 									onClick={() => handleRowClick(index)}
 								>
 									<th scope='row'>{row.id_appointment}</th>
-									<td>{row.date}</td>
+									<td>
+										{row.date !== null
+											? new Date(
+													row.date
+											  ).toLocaleDateString("cs-CZ")
+											: null}
+									</td>
 									<td>{row.time}</td>
 									<td>{row.firstName}</td>
 									<td>{row.lastName}</td>
@@ -253,7 +257,6 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 					</table>
 				</div>
 			</div>
-
 			{/* Ovládání stránkování */}
 			<div
 				className='d-flex justify-content-center'
