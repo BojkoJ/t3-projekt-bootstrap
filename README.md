@@ -27,6 +27,7 @@ Můžete si prohlédnout [create-t3-app GitHub repozitář](https://github.com/t
 Chcete-li projekt spustit, je třeba mít nainstalovaný <b>[Node.js](https://nodejs.org/en)</b> a <b>[pnpm](https://pnpm.io/)</b> package manager:
 
 -   Naklonujte repozitář
+-   Vytvořte soubor ".env" v kořenovém adresáři a zkopírujte do něj obsah souboru ".env.example"
 -   Spusttě `pnpm install` příkaz ve složce projektu pro nainstalování balíčků
 -   Spusťtě `pnpm run db:push` příkaz ve složce projektu pro vytvoření předdefinované databáze pomocí ORM Drizzle
 -   Spusttě `pnpm run dev` příkaz ve složce projektu pro spuštění aplikace
