@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { CombinedAppointmentData } from "~/server/api/routers/appointment";
 import useActiveRowStore from "../store";
 import Image from "next/image";
+import { Pagination } from "react-bootstrap"; // Import Bootstrap Pagination
 
 const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 	const router = useRouter();
@@ -28,11 +29,12 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const rowsPerPage = 4; // Počet řádků na stránku
 
+	// Adjusted row click function
 	const handleRowClick = (index: number) => {
+		// Adjust the index based on the current page
 		const adjustedIndex = indexOfFirstRow + index;
 
 		setActiveRowIndex(adjustedIndex);
-
 		const selectedRow = filteredRows[adjustedIndex];
 
 		const id_appointment = selectedRow?.id_appointment;
@@ -50,7 +52,7 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 		setIsFilterApplied(true);
 	};
 
-	// Filtruje řádky na základě hodnot filtrů a stavu isFilterApplied
+	// Filter rows based on the filter values and the isFilterApplied state
 	const filteredRows = isFilterApplied
 		? rows.filter((row) => {
 				const isLastNameMatch = row.lastName
@@ -75,26 +77,17 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 		  })
 		: rows;
 
-	// Počítání celkového počtu stránek
+	// Calculate total pages
 	const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
 
-	// Výpočet rozsahu řádků pro zobrazení na aktuální stránce
+	// Calculate the slice of rows to display on the current page
 	const indexOfLastRow = currentPage * rowsPerPage;
 	const indexOfFirstRow = indexOfLastRow - rowsPerPage;
 	const currentRows = filteredRows.slice(indexOfFirstRow, indexOfLastRow);
 
-	// Ovládací prvky pro stránkování
-	const handleNextPage = () => {
-		if (currentPage < totalPages) {
-			setCurrentPage((prevPage) => prevPage + 1);
-		}
-		setActiveRowIndex(null);
-	};
-
-	const handlePreviousPage = () => {
-		if (currentPage > 1) {
-			setCurrentPage((prevPage) => prevPage - 1);
-		}
+	// Handle page click events
+	const handlePageClick = (pageNumber: number) => {
+		setCurrentPage(pageNumber);
 		setActiveRowIndex(null);
 	};
 
@@ -247,26 +240,18 @@ const Table = ({ rows }: { rows: CombinedAppointmentData[] }) => {
 			</div>
 
 			{/* Ovládání stránkování */}
-			<div className="d-flex justify-content-center ">
-				<div className="d-flex justify-content-between align-items-center  w-25 ">
-					<button
-						className="btn btn-primary"
-						onClick={handlePreviousPage}
-						disabled={currentPage === 1}
-					>
-						Předchozí
-					</button>
-					<span className="mx-3">
-						Stránka {currentPage} z {totalPages}
-					</span>
-					<button
-						className="btn btn-primary"
-						onClick={handleNextPage}
-						disabled={currentPage === totalPages}
-					>
-						Další
-					</button>
-				</div>
+			<div className="d-flex justify-content-center" style={{ height: "20px" }}>
+				<Pagination>
+					{Array.from({ length: totalPages }, (_, index) => (
+						<Pagination.Item
+							key={index}
+							active={index + 1 === currentPage}
+							onClick={() => handlePageClick(index + 1)}
+						>
+							{index + 1}
+						</Pagination.Item>
+					))}
+				</Pagination>
 			</div>
 		</div>
 	);
