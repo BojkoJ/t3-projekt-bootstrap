@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { CombinedAppointmentData } from "~/server/api/routers/appointment";
 import useActiveRowStore from "../store";
-import { Button, Modal } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 
 const Formclient = ({
 	appointment,
